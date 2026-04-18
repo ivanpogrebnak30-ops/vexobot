@@ -1,21 +1,19 @@
 import asyncio
 import logging
-import os
+import random
 
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, WebAppInfo
 from aiogram.filters import CommandStart
 
-# 🔧 логирование
 logging.basicConfig(level=logging.INFO)
 
-# 🔑 токен
-BOT_TOKEN = "8333349750:AAFpxCIU3z5ly__Y1AhK1Dkg2f1wC7W5rCM"
+BOT_TOKEN = "8333349750:AAFpxCIU3z5ly__Y1AhK1Dkg2f1wC7W5rCM"  # 👈 вставь сюда токен
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
-# 🌐 клавиатура
+# 🔘 Кнопки
 kb = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text="🛍 Каталог")],
@@ -28,16 +26,15 @@ kb = ReplyKeyboardMarkup(
     resize_keyboard=True
 )
 
-# 🚀 старт
+# 🚀 Старт
 @dp.message(CommandStart())
 async def start(message: types.Message):
     await message.answer(
-        "👋 Добро пожаловать в VexoShop!\n\n"
-        "Выбери действие ниже 👇",
+        "👋 Добро пожаловать в VexoShop!\n\nВыбери действие ниже 👇",
         reply_markup=kb
     )
 
-# 🛍 каталог
+# 📦 Каталог
 @dp.message(F.text == "🛍 Каталог")
 async def catalog(message: types.Message):
     await message.answer(
@@ -48,44 +45,61 @@ async def catalog(message: types.Message):
         "Напиши, что интересует 👇"
     )
 
-# 💰 цены
+# 💰 Цены
 @dp.message(F.text == "💰 Цены")
 async def prices(message: types.Message):
     await message.answer(
         "💰 Примерные цены:\n\n"
         "• Одноразки — от 250 грн\n"
         "• Жидкости — от 150 грн\n"
-        "• POD-системы — от 600 грн\n\n"
-        "Точную цену уточняй 👇"
+        "• POD-системы — от 600 грн\n"
     )
 
-# 📩 связь
+# 📩 Связь
 @dp.message(F.text == "📨 Связь")
 async def contact(message: types.Message):
-    await message.answer(
-        "📨 Менеджер: @livaxw\n"
-        "Напиши для заказа или консультации 💬"
-    )
+    await message.answer("📨 Менеджер: @livaxw")
 
-# 💬 ответы на текст
+# 😂 Общий чат + шутки
 @dp.message(F.text)
 async def chat(message: types.Message):
     text = message.text.lower()
 
+    # ❌ если команда неправильная
+    if text.startswith("/"):
+        jokes = [
+            "🤔 Такой команды не существует",
+            "😅 Ты это сам придумал?",
+            "🚫 Команда не найдена",
+            "👀 Я такого не знаю",
+            "🫠 Попробуй /start"
+        ]
+        await message.answer(random.choice(jokes))
+        return
+
+    # ✅ нормальные ответы
     if "привет" in text:
         await message.answer("Привет 👋 Чем помочь?")
     elif "однораз" in text:
-        await message.answer("Есть Elf Bar и HQD 🔥 Напиши в личку: @livaxw")
+        await message.answer("Есть Elf Bar и HQD 🔥 Пиши: @livaxw")
     elif "жидк" in text:
-        await message.answer("Есть разные вкусы 🍓🥭 Напиши менеджеру: @livaxw")
-    else:
-        await message.answer(
-            "🤷‍♂️ Не понял, выбери кнопку ниже или напиши менеджеру: @livaxw"
-        )
+        await message.answer("Есть разные вкусы 🍓🥭 Пиши: @livaxw")
 
-# ▶️ запуск
+    # 😂 если не понял
+    else:
+        jokes = [
+            "🤷‍♂️ Я не понял, но звучит интересно",
+            "😂 Это не команда, но мне нравится",
+            "🧠 Обрабатываю... ошибка 404",
+            "🙃 Попробуй нажать кнопку ниже",
+            "😄 Я пока не такой умный"
+        ]
+        await message.answer(random.choice(jokes))
+
+
+# ▶️ Запуск
 async def main():
     await dp.start_polling(bot)
 
-if __name__ == "__main__":
+if name == "main":
     asyncio.run(main())
