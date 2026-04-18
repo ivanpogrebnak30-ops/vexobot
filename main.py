@@ -10,7 +10,7 @@ from aiogram.filters import CommandStart
 logging.basicConfig(level=logging.INFO)
 
 # 🔑 токен
-BOT_TOKEN = os.getenv("8333349750:AAFpxCIU3z5ly__Y1AhK1Dkg2f1wC7W5rCM")
+BOT_TOKEN = "8333349750:AAFpxCIU3z5ly__Y1AhK1Dkg2f1wC7W5rCM"
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
