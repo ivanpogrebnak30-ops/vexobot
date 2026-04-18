@@ -3,101 +3,111 @@ import logging
 import random
 
 from aiogram import Bot, Dispatcher, types, F
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, WebAppInfo
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 from aiogram.filters import CommandStart
 
 logging.basicConfig(level=logging.INFO)
 
-BOT_TOKEN = "8333349750:AAFpxCIU3z5ly__Y1AhK1Dkg2f1wC7W5rCM"  # 👈 вставь сюда токен
+BOT_TOKEN = "8333349750:AAFpxCIU3z5ly__Y1AhK1Dkg2f1wC7W5rCM"
+ADMIN_ID = 7908377164 # 👈 твой Telegram ID
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
-# 🔘 Кнопки
-kb = ReplyKeyboardMarkup(
+# 📦 временное хранение выбора
+user_orders = {}
+
+# 🔘 главное меню
+main_kb = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text="🛍 Каталог")],
-        [KeyboardButton(text="💰 Цены"), KeyboardButton(text="📨 Связь")],
-        [KeyboardButton(
-            text="🌐 Сайт",
-            web_app=WebAppInfo(url="https://gaze-yielding-firefly.tilda.ws/")
-        )]
+        [KeyboardButton(text="💰 Цены")],
     ],
     resize_keyboard=True
 )
 
-# 🚀 Старт
+# 📦 каталог
+catalog_kb = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="Elf Bar"), KeyboardButton(text="HQD")],
+        [KeyboardButton(text="Жидкость")],
+        [KeyboardButton(text="⬅ Назад")]
+    ],
+    resize_keyboard=True
+)
+
+# 🛒 кнопка заказа
+order_kb = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="✅ Заказать")],
+        [KeyboardButton(text="⬅ Назад")]
+    ],
+    resize_keyboard=True
+)
+
+# 🚀 старт
 @dp.message(CommandStart())
 async def start(message: types.Message):
-    await message.answer(
-        "👋 Добро пожаловать в VexoShop!\n\nВыбери действие ниже 👇",
-        reply_markup=kb
-    )
+    await message.answer("👋 Добро пожаловать!", reply_markup=main_kb)
 
-# 📦 Каталог
+# 📦 каталог
 @dp.message(F.text == "🛍 Каталог")
 async def catalog(message: types.Message):
-    await message.answer(
-        "🔥 Наш ассортимент:\n\n"
-        "• Одноразки (Elf Bar, HQD)\n"
-        "• Жидкости 30ml / 60ml\n"
-        "• POD-системы\n\n"
-        "Напиши, что интересует 👇"
-    )
+    await message.answer("Выбери товар 👇", reply_markup=catalog_kb)
 
-# 💰 Цены
+# ⬅ назад
+@dp.message(F.text == "⬅ Назад")
+async def back(message: types.Message):
+    await message.answer("Главное меню 👇", reply_markup=main_kb)
+
+# 💰 цены
 @dp.message(F.text == "💰 Цены")
 async def prices(message: types.Message):
     await message.answer(
-        "💰 Примерные цены:\n\n"
-        "• Одноразки — от 250 грн\n"
-        "• Жидкости — от 150 грн\n"
-        "• POD-системы — от 600 грн\n"
+        "💰 Цены:\n"
+        "• Elf Bar — 250 грн\n"
+        "• HQD — 250 грн\n"
+        "• Жидкость — 150 грн"
     )
 
-# 📩 Связь
-@dp.message(F.text == "📨 Связь")
-async def contact(message: types.Message):
-    await message.answer("📨 Менеджер: @livaxw")
+# 📦 выбор товара
+@dp.message(F.text.in_(["Elf Bar", "HQD", "Жидкость"]))
+async def choose_product(message: types.Message):
+    user_orders[message.from_user.id] = message.text
+    await message.answer(
+        f"Ты выбрал: {message.text}\nНажми заказать 👇",
+        reply_markup=order_kb
+    )
 
-# 😂 Общий чат + шутки
-@dp.message(F.text)
-async def chat(message: types.Message):
-    text = message.text.lower()
+# 🛒 заказ
+@dp.message(F.text == "✅ Заказать")
+async def order(message: types.Message):
+    product = user_orders.get(message.from_user.id, "Неизвестно")
 
-    # ❌ если команда неправильная
-    if text.startswith("/"):
-        jokes = [
-            "🤔 Такой команды не существует",
-            "😅 Ты это сам придумал?",
-            "🚫 Команда не найдена",
-            "👀 Я такого не знаю",
-            "🫠 Попробуй /start"
-        ]
-        await message.answer(random.choice(jokes))
-        return
+    # сообщение тебе
+    text = (
+        f"🛒 НОВЫЙ ЗАКАЗ!\n\n"
+        f"👤 @{message.from_user.username}\n"
+        f"📦 Товар: {product}"
+    )
 
-    # ✅ нормальные ответы
-    if "привет" in text:
-        await message.answer("Привет 👋 Чем помочь?")
-    elif "однораз" in text:
-        await message.answer("Есть Elf Bar и HQD 🔥 Пиши: @livaxw")
-    elif "жидк" in text:
-        await message.answer("Есть разные вкусы 🍓🥭 Пиши: @livaxw")
+    await bot.send_message(ADMIN_ID, text)
 
-    # 😂 если не понял
-    else:
-        jokes = [
-            "🤷‍♂️ Я не понял, но звучит интересно",
-            "😂 Это не команда, но мне нравится",
-            "🧠 Обрабатываю... ошибка 404",
-            "🙃 Попробуй нажать кнопку ниже",
-            "😄 Я пока не такой умный"
-        ]
-        await message.answer(random.choice(jokes))
+    await message.answer("✅ Заказ отправлен! С тобой скоро свяжутся", reply_markup=main_kb)
 
+# 😂 шутки
+@dp.message()
+async def jokes(message: types.Message):
+    jokes = [
+        "🤔 Я не понял, но звучит круто",
+        "😂 Нажми кнопку, не пугай меня",
+        "🧠 Ошибка: человек слишком креативный",
+        "🙃 Я работаю только с кнопками",
+        "😄 Ты пытаешься меня сломать?"
+    ]
+    await message.answer(random.choice(jokes))
 
-# ▶️ Запуск
+# ▶ запуск
 async def main():
     await dp.start_polling(bot)
 
