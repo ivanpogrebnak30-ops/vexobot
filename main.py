@@ -31,10 +31,10 @@ kb = ReplyKeyboardMarkup(
 @dp.message(CommandStart())
 async def start(message: types.Message):
     await message.answer(
-        "👋 Привет, добро пожаловать в VexoShop 🇺🇦 Свой первый заказ вы можете заказать, а также задать любой вопрос у нашего менеджера
-        📨 Связь с менеджером: @livaxw\n\n",
+        "👋 Привет, добро пожаловать в VexoShop 🇺🇦!\n"
+        "🛍 Здесь ты можешь оформить первый заказ или задать любой вопрос.\n\n"
+        "📨 Связь с менеджером: @livaxw",
         reply_markup=kb
-        
     )
 
 # 📦 каталог
