@@ -49,7 +49,7 @@ async def start(message: types.Message):
         "Я пытался перевести… Google сдался 😶",
         "Слишком мощно, я не вывожу 😵"
 
-        ]
+        
           reply_markup=kb
     
    )
